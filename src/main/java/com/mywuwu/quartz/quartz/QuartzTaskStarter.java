@@ -55,7 +55,7 @@ public class QuartzTaskStarter implements ApplicationListener<ContextRefreshedEv
                     jobMap.put("love", "最大的幸福，娶了一个你····");
                     jobMap.put("back", "努力工作，好好生活····享受人生");
                     jobMap.put("id", quartz.getId());
-                    quartzManager.addJob(quartzDto, jobMap);
+//                    quartzManager.addJob(quartzDto, jobMap);
                 }
             }
 

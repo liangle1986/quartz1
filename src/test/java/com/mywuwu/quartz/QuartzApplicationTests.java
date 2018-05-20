@@ -1,5 +1,6 @@
 package com.mywuwu.quartz;
 
+import com.mywuwu.quartz.controller.AlipayController;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,12 @@ import javax.mail.internet.MimeMessage;
 public class QuartzApplicationTests {
 	@Autowired
 	private static JavaMailSender sender;
+	private AlipayController alipayController = new AlipayController();
 	@Test
 	public void contextLoads() {
-		MimeMessage message = sender.createMimeMessage();
+		alipayController.alipayClient();
+
+		/*MimeMessage message = sender.createMimeMessage();
 
 		try {
 			//true表示需要创建一个multipart message
@@ -32,7 +36,7 @@ public class QuartzApplicationTests {
 			sender.send(message);
 
 		} catch (MessagingException e) {
-		}
+		}*/
 	}
 
 }

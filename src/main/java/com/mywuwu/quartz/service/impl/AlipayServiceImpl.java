@@ -3,26 +3,40 @@ package com.mywuwu.quartz.service.impl;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.domain.AlipayTradeFastpayEteDidiPayModel;
+import com.alipay.api.domain.AlipayTradeFastpayRefundQueryModel;
 import com.alipay.api.domain.AlipayTradeWapPayModel;
+import com.alipay.api.request.AlipayFundTransOrderQueryRequest;
+import com.alipay.api.request.AlipayTradeFastpayRefundQueryRequest;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
+import com.alipay.api.response.AlipayFundTransOrderQueryResponse;
+import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
+import com.mywuwu.quartz.dto.AjaxResult;
 import com.mywuwu.quartz.dto.AlipayOrderDto;
 import com.mywuwu.quartz.pay.alipay.AlipayConfig;
 import com.mywuwu.quartz.service.IAlipayService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
 /**
- * Package: com.mywuwu.quartz.service.impl
- * Description： 支付宝支付实现类
- * Author: 梁乐乐
- * Date: Created in 2018/5/20 10:52
- * Company: clinbrain
- * Copyright: Copyright (c) 2018
- * Version: 0.0.1
- * Modified By:
+ * @Package: com.mywuwu.quartz.service.impl
+ * @Description： 支付宝支付实现类
+ * @Author: 梁乐乐
+ * @Date: Created in 2018/5/20 10:52
+ * @Company: clinbrain
+ * @Copyright: Copyright (c) 2018
+ * @Version: 0.0.1
+ * @Modified By:
  */
 @Service
 public class AlipayServiceImpl implements IAlipayService {
+
+    /**
+     * 日志记录
+     */
+    private final static Logger LOGGER = LoggerFactory.getLogger(AlipayServiceImpl.class);
 
 
     /**
@@ -31,17 +45,15 @@ public class AlipayServiceImpl implements IAlipayService {
      * @param orderDto 订单信息
      * @return 支付表单
      */
+    @Override
     public String alipayTradeWapPay(AlipayOrderDto orderDto) {
         String form = "";
         try {
             // SDK 公共请求类，包含公共请求参数，以及封装了签名与验签，开发者无需关注签名与验签
             //调用RSA签名方式
-//            AlipayClient client = new DefaultAlipayClient(AlipayConfig.URL, AlipayConfig.APPID, AlipayConfig.RSA_PRIVATE_KEY, AlipayConfig.FORMAT, AlipayConfig.CHARSET, AlipayConfig.ALIPAY_PUBLIC_KEY, AlipayConfig.SIGNTYPE);
+            AlipayClient client = new DefaultAlipayClient(AlipayConfig.URL, AlipayConfig.APPID, AlipayConfig.RSA_PRIVATE_KEY, AlipayConfig.FORMAT, AlipayConfig.CHARSET, AlipayConfig.ALIPAY_PUBLIC_KEY, AlipayConfig.SIGNTYPE);
 
-            AlipayClient client = new DefaultAlipayClient("https://openapi.alipaydev.com/gateway.do", "2016091500515364",
-                    "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCPI/Mmj/o3UyR9iI3vRpPFLTMdT+XQfzzYG6T6eRWl/ZSvhePB0zSxvkfrAGwKQdq54DYIj61Crrgi9EJ4lJzxY6MIExxIYmNLEIYjpuOsdckqxgjZZmUcytFzSe2ZZJedntX9VU5faW3QRyJA5n9DyuPMPtmCXAU6fjHZ7SISbuNaNy4mKLUbCKm0hc9iHSDZ0WbXx2lkRhlL/NKeVp8K9qsYRDHGcPdl3t72UFo2/tkGJ9o8omBX0kQxDQsUCTvYDw0mpQP+R+HWrb3j4u9oJdsFIeuGZzvbm8n18Alo/sEmFkwS2Ft7hO0tr8HTtjxYXEZdoRAfYtLMuTooA3yhAgMBAAECggEAX7A1pMrNB10SYMT/tTwmHsMHj4nQ5N+aKhHY6QQ2/58UXX4Q8oqhiEzewO+oSfcaI/YJyRFbTt+EAwHsybT3cbscypIT7yOuowip032GZ8zZrTlzwvlbkLLY78w1BL0lSd5byR3U5Z2SJpDXCjHMU+J3BBvjxeyEJkUkSD3o8A6hXNfcqsB/2UMQrnjytxiqh0ijXtCQHvyq7ko5W8E9a0ad6DsEiRcVf2w9eMqLrAr5jHiBRj6GzkK6yTStXvJ8FtW1p7ik3ctcu7lD3s/lCFSuwTE0OaCwQaEeFejl1jbDi6hhLXkf/euB60nMIg30ZzxeMxo49cwDqr/9/2fgkQKBgQDsK9hqgET/T2a7w7U7IvsWvusLoKbqkthKW+vJK725Nfjf64+LgLTotULpkgO475JyluR0ad3woy+1KA8MYjWOvSxNVTyiwpZKE+UA+0DoAQ59sVfbTjbWL8wo2OZyHl2bSVVTw/9mPcgG1m6NBN9l/bBhKPqf2oBNR/fNFPMbdQKBgQCbKIsJKvOkKWxtv2T61Lx8RXqVuLI9J2cB2zp/PhMIdM4PDpKCMgKJHYeN77JRYt8TsO+DWdMCWw3qxOjNxWKaRq6rzV/GazFCdE2TW1CFmsVahfRBWE3iDiI+SqxwWer3rK/5Cg2CfZQjUpBwT5tqELzeFfbw6iaI3j9WrMKy/QKBgDLclnUJPtLFJNjXIxajR/P0FeahKJFoIpCRD0x50RgsGXcP4hAnHc7oCosG2Spg3eczu+ueSR/j5QhcojEGjYY6E2psKuzaf0dg1XbKpYXRhG9pXARs6b5i+NLrM2XsSDiDKI8rrLs2HvfqAlD4dawfYHbsPl1izzLVhvZxxpFpAoGBAJYPqCi9udZTmeKq8WcGySUHrX+QmhI7QYyyEulth8rt7Tzyww/YfktOnAPSh4vfLBFHVt6ayVHF7rfYqbAZ7zt2kQjoIHEuyv2SrlSORFpzTdw3IfzxAqJXORc18YDX9kCEa81Yw6go/FUNTVTSKWVzurawV5y5WXuWN3wEqmmhAoGAeHzxHtlmihqmqkViLQbpBoGJPzU5x7UfyzS9PdsjvE2WZghBPCI0EQS2REgQiRvrVmWIYIm26J3WEsYbfEDWndAMYOKN1nJTJCJT4qh34mm3lCaxFeNa6m6tnX7CIRqLxH1kdBr267UaM8Vfr653P7Qg3ALnvC1H84SOzQwFes4="
-                    , "json", "utf-8", "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvbmibHAKUsRNJXKq9LmndvbWaBZXTEfKHTu8hE1/jZs5pQ25g4svLppho+sXikLXKhqzNFg5uXNrytzS1j5SOvCQrIODgi+iVBwAQTBye2qrboB/3FyvK2c6SLXT2XqgveVuNSJkEGIKOt4Omw3zKvoLBCQvvAajVkv54jhGZRHcPtCtbO5O+Ef8Jnazj8vpnby10RorBXSKiEw0CiLJcWBiaa5SBa+syt2rH+EPs7zDcltkio81C5tGzBUjkUGPfCnhxsbDRVg3XRxQQIVAi4uvbvejH9DpyjhQehPBq7s9NIwupaspclHLSoG4vUIyQxk0doBKe12AKBq89YWDkwIDAQAB"
-                    , "RSA2");
+
             //阿里支付请求类
             AlipayTradeWapPayRequest alipay_request = new AlipayTradeWapPayRequest();
 
@@ -63,7 +75,111 @@ public class AlipayServiceImpl implements IAlipayService {
             form = client.pageExecute(alipay_request).getBody();
         } catch (AlipayApiException e) {
             e.printStackTrace();
+            LOGGER.error("支付出错。", e);
         }
         return form;
+    }
+
+    /**
+     * @param fasModel 退款对象
+     * @return com.mywuwu.quartz.dto.AjaxResult
+     * @Description： 支付宝退款
+     * @Author: 梁乐乐
+     * @Date: Created in 2018/5/20 20:42
+     */
+    @Override
+    public AjaxResult alipayTradeFastpayRefundQuery(AlipayTradeFastpayEteDidiPayModel fasModel) {
+
+        //返回对象
+        AjaxResult result = new AjaxResult();
+
+        try {
+            //验证前面
+            AlipayClient client = new DefaultAlipayClient(AlipayConfig.URL, AlipayConfig.APPID, AlipayConfig.RSA_PRIVATE_KEY, AlipayConfig.FORMAT, AlipayConfig.CHARSET, AlipayConfig.ALIPAY_PUBLIC_KEY, AlipayConfig.SIGNTYPE);
+
+            AlipayTradeFastpayRefundQueryRequest request = new AlipayTradeFastpayRefundQueryRequest();
+
+            request.setBizModel(fasModel);
+
+            AlipayTradeFastpayRefundQueryResponse response = client.execute(request);
+
+            if (response.isSuccess()) {
+                result.setCode("0");
+                result.setMessage("退款成功。本次退款：" + response.getRefundAmount());
+            } else {
+                result.setCode(response.getErrorCode());
+                result.setMessage("退款失败。本次退款订单：" + response.getOutTradeNo() + ";退款金额：" + response.getRefundAmount());
+            }
+            result.setData(request);
+            return result;
+        } catch (AlipayApiException e) {
+            e.printStackTrace();
+            result.setCode("1");
+            result.setMessage("退款失败,系统出错。");
+            LOGGER.error("退款出错。", e);
+            return result;
+        }
+
+    }
+
+    /**
+     * @param queryModel 退款订单查询对象
+     * @return com.mywuwu.quartz.dto.AjaxResult
+     * @Description： 退款订单查询
+     * @Author: 梁乐乐
+     * @Date: Created in 2018/5/20 20:49
+     */
+    @Override
+    public AjaxResult alipayFundTransOrderQuery(AlipayTradeFastpayRefundQueryModel queryModel) {
+        //返回对象
+        AjaxResult result = new AjaxResult();
+        try {
+            AlipayClient alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", "app_id", "your private_key", "json", "GBK", "alipay_public_key", "RSA2");
+            AlipayFundTransOrderQueryRequest request = new AlipayFundTransOrderQueryRequest();
+            request.setBizModel(queryModel);
+            AlipayFundTransOrderQueryResponse response = alipayClient.execute(request);
+            /**
+             * 转账单据状态。
+             SUCCESS：成功（配合"单笔转账到银行账户接口"产品使用时, 同一笔单据多次查询有可能从成功变成退票状态）；
+             FAIL：失败（具体失败原因请参见error_code以及fail_reason返回值）；
+             INIT：等待处理；
+             DEALING：处理中；
+             REFUND：退票（仅配合"单笔转账到银行账户接口"产品使用时会涉及, 具体退票原因请参见fail_reason返回值）；
+             UNKNOWN：状态未知。
+             */
+            if (response.isSuccess()) {
+                if ("SUCCESS".equalsIgnoreCase(response.getStatus())) {
+                    result.setCode("0");
+                    result.setMessage("退款成功，预计到账时间：" + response.getArrivalTimeEnd() + ";具体到账时间已银行为准。");
+
+                } else if ("FAIL".equalsIgnoreCase(response.getStatus())) {
+                    result.setCode("-10000");
+                    result.setMessage("退款失败，失败原因：" + response.getFailReason() + ";错误码：[" + response.getErrorCode() + "]");
+                } else if ("INIT".equalsIgnoreCase(response.getStatus())) {
+                    result.setCode("1");
+                    result.setMessage("退款等待处理，请赖心等待。");
+                } else if ("DEALING".equalsIgnoreCase(response.getStatus())) {
+                    result.setCode("2");
+                    result.setMessage("退款处理中，请赖心等待。");
+                } else if ("REFUND".equalsIgnoreCase(response.getStatus())) {
+                    result.setCode("3");
+                    result.setMessage("订单被退票，原因：" + response.getFailReason());
+                } else {
+                    result.setCode("4");
+                    result.setMessage("未知错误，请赖心等待系统处理。");
+                }
+
+                result.setData(response);
+            } else {
+                result.setCode("-10001");
+                result.setMessage("系统调用错误，请联系管理员.");
+            }
+            return result;
+        } catch (Exception e) {
+            LOGGER.error("查询退款订单出错。", e);
+            result.setCode("-10001");
+            result.setMessage("系统调用错误，请联系管理员.");
+            return result;
+        }
     }
 }

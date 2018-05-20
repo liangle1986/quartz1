@@ -138,7 +138,7 @@ public class AlipayController {
         orderDto.setProductCode("MYWUWU_IPHONE_8P" + DateUtils.date2string(new Date(),DateUtils.YYYY_MM_DD_HH_MM_SS));
         orderDto.setSubject("苹果手机");
         orderDto.setTimeoutExpress("90m");
-        orderDto.setTotalAmount("0.1");
+        orderDto.setTotalAmount("0.01");
         return alipayService.alipayTradeWapPay(orderDto);
     }
 }
